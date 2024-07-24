@@ -1,40 +1,64 @@
 package chip8
 
-import "math/rand/v2"
+import (
+	"errors"
+	"os"
+)
 
 const (
-	programStart = 0x200
-	// maxRomSize    = 0xFFF - 0x200
+	programStart        = 0x200
+	maxRomSize          = 0xFFF - 0x200
+	fontSetStartAddress = 0x050
+
 	DisplayWidth  = 64
 	DisplayHeight = 32
 )
 
-// // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0
+// http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0
 type Chip8 struct {
-	// memory         [4096]byte
-	// opcode         uint16
-	// v              [16]byte
-	// indexRegister  uint16
+	memory         [4096 * 2]byte
+	V              [16]byte
+	indexRegister  uint16
 	programCounter uint16
 	display        [DisplayWidth * DisplayHeight]byte
 
-	// delayTimer byte
-	// soundTimer byte
+	delayTimer byte
+	soundTimer byte
 
-	// stack        [16]uint16
-	// stackPointer uint16
+	stack        [16]uint16
+	stackPointer uint16
 
-	// keypad [16]byte
+	keypad [16]byte
+}
+
+var fontSet = []uint8{
+	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
+	0x20, 0x60, 0x20, 0x20, 0x70, //1
+	0xF0, 0x10, 0xF0, 0x80, 0xF0, //2
+	0xF0, 0x10, 0xF0, 0x10, 0xF0, //3
+	0x90, 0x90, 0xF0, 0x10, 0x10, //4
+	0xF0, 0x80, 0xF0, 0x10, 0xF0, //5
+	0xF0, 0x80, 0xF0, 0x90, 0xF0, //6
+	0xF0, 0x10, 0x20, 0x40, 0x40, //7
+	0xF0, 0x90, 0xF0, 0x90, 0xF0, //8
+	0xF0, 0x90, 0xF0, 0x10, 0xF0, //9
+	0xF0, 0x90, 0xF0, 0x90, 0x90, //A
+	0xE0, 0x90, 0xE0, 0x90, 0xE0, //B
+	0xF0, 0x80, 0x80, 0x80, 0xF0, //C
+	0xE0, 0x90, 0x90, 0x90, 0xE0, //D
+	0xF0, 0x80, 0xF0, 0x80, 0xF0, //E
+	0xF0, 0x80, 0xF0, 0x80, 0x80, //F
 }
 
 func NewChip8() *Chip8 {
 	chip8 := &Chip8{
 		programCounter: programStart,
 	}
-	// debug randomize
-	for bit := range chip8.display {
-		chip8.display[bit] = byte(rand.IntN(2))
+
+	for i := 0; i < len(fontSet); i++ {
+		chip8.memory[fontSetStartAddress+i] = fontSet[i]
 	}
+
 	return chip8
 }
 
@@ -42,16 +66,16 @@ func (c *Chip8) GetDisplay() [DisplayWidth * DisplayHeight]byte {
 	return c.display
 }
 
-// func (chip *Chip8) LoadROM(path string) error {
-// 	rom, err := os.ReadFile(path)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	if len(rom) > maxRomSize {
-// 		return errors.New("error: rom too lang. Max size: 3583 bytes")
-// 	}
-// 	for index, byte := range rom {
-// 		chip.memory[programStart+index] = byte
-// 	}
-// 	return nil
-// }
+func (c *Chip8) LoadROM(path string) error {
+	rom, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	if len(rom) > maxRomSize {
+		return errors.New("error: rom too lang. Max size: 3583 bytes")
+	}
+	for index, bit := range rom {
+		c.memory[programStart+index] = bit
+	}
+	return err
+}

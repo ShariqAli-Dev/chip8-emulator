@@ -9,6 +9,9 @@ import (
 
 func main() {
 	chip8 := chip8.NewChip8()
+	if err := chip8.LoadROM("./roms/IBM Logo.ch8"); err != nil {
+		log.Fatal(error.Error(err))
+	}
 
 	defer sdl.Close()
 	if err := sdl.Init(); err != nil {
@@ -21,6 +24,5 @@ func main() {
 		log.Fatal(error.Error(err))
 	}
 
-	for display.Tick(chip8) {
-	}
+	display.Tick(chip8)
 }
