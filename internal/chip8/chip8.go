@@ -1,5 +1,7 @@
 package chip8
 
+import "math/rand/v2"
+
 const (
 	programStart = 0x200
 	// maxRomSize    = 0xFFF - 0x200
@@ -26,9 +28,14 @@ type Chip8 struct {
 }
 
 func NewChip8() *Chip8 {
-	return &Chip8{
+	chip8 := &Chip8{
 		programCounter: programStart,
 	}
+	// debug randomize
+	for bit := range chip8.display {
+		chip8.display[bit] = byte(rand.IntN(2))
+	}
+	return chip8
 }
 
 func (c *Chip8) GetDisplay() [DisplayWidth * DisplayHeight]byte {

@@ -22,6 +22,5 @@ func main() {
 	}
 
 	for display.Tick(chip8) {
-
 	}
 }
