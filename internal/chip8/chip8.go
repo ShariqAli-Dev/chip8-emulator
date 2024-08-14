@@ -2,6 +2,7 @@ package chip8
 
 import (
 	"errors"
+	"math/rand/v2"
 	"os"
 )
 
@@ -33,17 +34,22 @@ var fontSet = []uint8{
 }
 
 // http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0
+type Display = [DisplayHeight][DisplayWidth]uint8
 type Chip8 struct {
-	memory      [4096]byte
-	display     [DisplayWidth * DisplayHeight]byte // resolution pixel
-	pc          uint16                             // program counter
-	v           [16]byte                           // data register v0-vf
-	i           uint16                             // index register
-	delayTimer  byte
-	soundTimer  byte
-	stack       [12]uint16 // subroutine stack
-	sp          uint16     // stack pointer
-	keypad      [16]bool
+	display Display // resolution pixel
+
+	memory [4096]uint8
+	v      [16]byte // data register v0-vf
+	keypad [16]bool
+	stack  [16]uint16 // subroutine stack
+
+	pc uint16 // program counter
+	i  uint16 // index register
+	sp uint16 // stack pointer
+
+	delayTimer byte
+	soundTimer byte
+
 	instruction struct {
 		opcode uint16
 		nnn    uint16 // 12-bit address/constant
@@ -58,13 +64,21 @@ func NewChip8() *Chip8 {
 	chip8 := Chip8{
 		pc: programStart,
 	}
-	for i := 0; i < len(fontSet); i++ {
-		chip8.memory[fontSetStartAddress+i] = fontSet[i]
+	for x := range chip8.display {
+		for y := range chip8.display[x] {
+			if rand.Float32() < 0.95 {
+				chip8.display[x][y] = 1
+			} else {
+
+				chip8.display[x][y] = 0
+			}
+		}
 	}
+	copy(chip8.memory[:len(fontSet)], fontSet)
 	return &chip8
 }
 
-func (c *Chip8) GetDisplay() [DisplayWidth * DisplayHeight]byte {
+func (c *Chip8) GetDisplay() Display {
 	return c.display
 }
 

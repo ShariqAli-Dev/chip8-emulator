@@ -57,50 +57,27 @@ func (d *display) Close() {
 	d.window = nil
 }
 
-func (d *display) Render(display [64 * 32]byte) {
-	// loop through the display pixles
-	for i := 0; i < len(display); i++ {
-		//  translate 1d index i value to 2d x/y coordinates
-		// x = i % windowWidth
-		// y = i / windowHeight
-		x := (i % displayWidth) * scaleFactor
-		y := (i / displayHeight) * scaleFactor
-		rect := sdl.Rect{X: int32(x), Y: int32(y), W: scaleFactor, H: scaleFactor}
+func (d *display) Render(display chip8.Display) {
+	d.renderer.SetDrawColor(255, 0, 0, 255)
+	d.renderer.Clear()
 
-		fmt.Println(display[i])
-		if display[i] == 1 {
-			d.renderer.SetDrawColor(0, 0, 255, 255) // black
-		} else {
-			d.renderer.SetDrawColor(0, 0, 0, 255) // black
+	// get the display buffer and render it
+	for j := 0; j < len(display); j++ {
+		for i := 0; i < len(display[j]); i++ {
+			// values of pixel are stored in 1d array of size 64 * 2
+			if display[j][i] != 0 {
+				d.renderer.SetDrawColor(0, 0, 0, 255)
+			} else {
+				d.renderer.SetDrawColor(255, 255, 255, 255)
+			}
+			d.renderer.FillRect(&sdl.Rect{
+				Y: int32(j) * scaleFactor,
+				X: int32(i) * scaleFactor,
+				W: scaleFactor,
+				H: scaleFactor,
+			})
 		}
-
-		d.renderer.Clear()
-		d.renderer.DrawRect(&rect)
 	}
-	// pixels := make([]byte, displayWidth*displayHeight*4) // 4 bytes per pixel (RGBA)
-
-	// for i := 0; i < len(display); i++ {
-	// 	index := i * 4
-	// 	if display[i] == 1 {
-	// 		pixels[index] = 255   // R
-	// 		pixels[index+1] = 255 // G
-	// 		pixels[index+2] = 255 // B
-	// 		pixels[index+3] = 255 // A
-	// 	} else {
-	// 		pixels[index] = 0     // R
-	// 		pixels[index+1] = 0   // G
-	// 		pixels[index+2] = 0   // B
-	// 		pixels[index+3] = 255 // A
-	// 	}
-	// }
-
-	// d.pixelTexture.Update(nil, unsafe.Pointer(&pixels[0]), displayWidth*4)
-
-	// d.renderer.SetDrawColor(0, 255, 0, 255) // black
-	// d.renderer.Clear()
-
-	// destRect := sdl.Rect{X: 0, Y: 0, W: displayWidth * scaleFactor, H: displayHeight * scaleFactor}
-	// d.renderer.Copy(d.pixelTexture, nil, &destRect)
 
 	d.renderer.Present()
 	sdl.Delay(uint32(1000 / fps))

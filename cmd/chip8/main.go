@@ -26,6 +26,5 @@ func main() {
 
 	for display.Tick(chip8) {
 		chip8.EmulateCycle()
-
 	}
 }
