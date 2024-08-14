@@ -66,9 +66,10 @@ func (d *display) Render(display chip8.Display) {
 		for i := 0; i < len(display[j]); i++ {
 			// values of pixel are stored in 1d array of size 64 * 2
 			if display[j][i] != 0 {
-				d.renderer.SetDrawColor(0, 0, 0, 255)
-			} else {
 				d.renderer.SetDrawColor(255, 255, 255, 255)
+			} else {
+
+				d.renderer.SetDrawColor(0, 0, 0, 255)
 			}
 			d.renderer.FillRect(&sdl.Rect{
 				Y: int32(j) * scaleFactor,

@@ -2,7 +2,6 @@ package chip8
 
 import (
 	"errors"
-	"math/rand/v2"
 	"os"
 )
 
@@ -63,16 +62,6 @@ type Chip8 struct {
 func NewChip8() *Chip8 {
 	chip8 := Chip8{
 		pc: programStart,
-	}
-	for x := range chip8.display {
-		for y := range chip8.display[x] {
-			if rand.Float32() < 0.95 {
-				chip8.display[x][y] = 1
-			} else {
-
-				chip8.display[x][y] = 0
-			}
-		}
 	}
 	copy(chip8.memory[:len(fontSet)], fontSet)
 	return &chip8
