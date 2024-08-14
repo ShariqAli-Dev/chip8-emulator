@@ -2,7 +2,6 @@ package sdl
 
 import (
 	"fmt"
-	"unsafe"
 
 	"github.com/shariqali-dev/chip8-emulator/internal/chip8"
 	"github.com/veandco/go-sdl2/sdl"
@@ -58,46 +57,56 @@ func (d *display) Close() {
 	d.window = nil
 }
 
-// Render draws the current state of the CHIP-8 display
 func (d *display) Render(display [64 * 32]byte) {
-	// Create a buffer to hold pixel data
-	pixels := make([]byte, displayWidth*displayHeight*4) // 4 bytes per pixel (RGBA)
-
-	// Convert CHIP-8 display data to RGBA pixel data
+	// loop through the display pixles
 	for i := 0; i < len(display); i++ {
-		index := i * 4
+		//  translate 1d index i value to 2d x/y coordinates
+		// x = i % windowWidth
+		// y = i / windowHeight
+		x := (i % displayWidth) * scaleFactor
+		y := (i / displayHeight) * scaleFactor
+		rect := sdl.Rect{X: int32(x), Y: int32(y), W: scaleFactor, H: scaleFactor}
+
+		fmt.Println(display[i])
 		if display[i] == 1 {
-			pixels[index] = 255   // R
-			pixels[index+1] = 255 // G
-			pixels[index+2] = 255 // B
-			pixels[index+3] = 255 // A
+			d.renderer.SetDrawColor(0, 0, 255, 255) // black
 		} else {
-			pixels[index] = 0     // R
-			pixels[index+1] = 0   // G
-			pixels[index+2] = 0   // B
-			pixels[index+3] = 255 // A
+			d.renderer.SetDrawColor(0, 0, 0, 255) // black
 		}
+
+		d.renderer.Clear()
+		d.renderer.DrawRect(&rect)
 	}
+	// pixels := make([]byte, displayWidth*displayHeight*4) // 4 bytes per pixel (RGBA)
 
-	// Update the texture with the new pixel data
-	d.pixelTexture.Update(nil, unsafe.Pointer(&pixels[0]), displayWidth*4)
+	// for i := 0; i < len(display); i++ {
+	// 	index := i * 4
+	// 	if display[i] == 1 {
+	// 		pixels[index] = 255   // R
+	// 		pixels[index+1] = 255 // G
+	// 		pixels[index+2] = 255 // B
+	// 		pixels[index+3] = 255 // A
+	// 	} else {
+	// 		pixels[index] = 0     // R
+	// 		pixels[index+1] = 0   // G
+	// 		pixels[index+2] = 0   // B
+	// 		pixels[index+3] = 255 // A
+	// 	}
+	// }
 
-	// Clear the renderer and draw the texture
-	d.renderer.SetDrawColor(0, 0, 0, 255) // black
-	d.renderer.Clear()
+	// d.pixelTexture.Update(nil, unsafe.Pointer(&pixels[0]), displayWidth*4)
 
-	destRect := sdl.Rect{X: 0, Y: 0, W: displayWidth * scaleFactor, H: displayHeight * scaleFactor}
-	d.renderer.Copy(d.pixelTexture, nil, &destRect)
+	// d.renderer.SetDrawColor(0, 255, 0, 255) // black
+	// d.renderer.Clear()
 
-	// Present the renderer
+	// destRect := sdl.Rect{X: 0, Y: 0, W: displayWidth * scaleFactor, H: displayHeight * scaleFactor}
+	// d.renderer.Copy(d.pixelTexture, nil, &destRect)
+
 	d.renderer.Present()
-
-	// Cap the frame rate
 	sdl.Delay(uint32(1000 / fps))
 }
 
 func (d *display) Tick(c *chip8.Chip8) bool {
-	// Handle SDL events
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch e := event.(type) {
 		case *sdl.QuitEvent:
