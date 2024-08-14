@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	fps           = 30
+	fps           = 6
 	scaleFactor   = 15
 	displayWidth  = chip8.DisplayWidth * scaleFactor
 	displayHeight = chip8.DisplayHeight * scaleFactor
