@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	fps           = 6
+	fps           = 60
 	scaleFactor   = 15
 	displayWidth  = chip8.DisplayWidth * scaleFactor
 	displayHeight = chip8.DisplayHeight * scaleFactor
@@ -61,10 +61,8 @@ func (d *display) Render(display chip8.Display) {
 	d.renderer.SetDrawColor(255, 0, 0, 255)
 	d.renderer.Clear()
 
-	// get the display buffer and render it
 	for j := 0; j < len(display); j++ {
 		for i := 0; i < len(display[j]); i++ {
-			// values of pixel are stored in 1d array of size 64 * 2
 			if display[j][i] != 0 {
 				d.renderer.SetDrawColor(255, 255, 255, 255)
 			} else {
@@ -76,6 +74,16 @@ func (d *display) Render(display chip8.Display) {
 				X: int32(i) * scaleFactor,
 				W: scaleFactor,
 				H: scaleFactor,
+			})
+
+			// rectangle border (smaller rectangle)
+			d.renderer.SetDrawColor(0, 0, 0, 255)
+			borderThickness := int32(1)
+			d.renderer.DrawRect(&sdl.Rect{
+				Y: int32(j)*scaleFactor - borderThickness,
+				X: int32(i)*scaleFactor - borderThickness,
+				W: scaleFactor + 2*borderThickness,
+				H: scaleFactor + 2*borderThickness,
 			})
 		}
 	}
