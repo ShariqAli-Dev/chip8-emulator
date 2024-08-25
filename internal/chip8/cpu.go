@@ -23,6 +23,7 @@ func (c *Chip8) EmulateCycle() {
 					c.display[i][j] = 0
 				}
 			}
+			c.shouldDraw = true
 			c.pc += 2
 		case 0x000E: // 0x00EE returns from a subroutine
 			c.sp--
@@ -60,6 +61,7 @@ func (c *Chip8) EmulateCycle() {
 				}
 			}
 		}
+		c.shouldDraw = true
 		c.pc += 2
 	case 0xF000:
 		switch c.instruction.opcode & 0x00FF {
@@ -81,5 +83,15 @@ func (c *Chip8) EmulateCycle() {
 		}
 	default:
 		fmt.Printf("INVALID OPCODE %X\n", c.instruction.opcode)
+	}
+
+	if c.delayTimer > 0 {
+		c.delayTimer -= 1
+	}
+	if c.soundTimer > 0 {
+		if c.soundTimer == 1 {
+			// play the beepor sound effect
+		}
+		c.soundTimer -= 1
 	}
 }

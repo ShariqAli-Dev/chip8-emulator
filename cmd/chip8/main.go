@@ -7,6 +7,7 @@ import (
 	"github.com/shariqali-dev/chip8-emulator/internal/sdl"
 )
 
+// https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
 func main() {
 	chip8 := chip8.NewChip8()
 	if err := chip8.LoadROM("./roms/IBM Logo.ch8"); err != nil {

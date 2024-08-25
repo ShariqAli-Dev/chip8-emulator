@@ -7,7 +7,7 @@ import (
 
 const (
 	programStart        = 0x200
-	maxRomSize          = 0xFFF - 0x200
+	maxRomSize          = 0xFFF - programStart
 	fontSetStartAddress = 0x050
 	DisplayWidth        = 64
 	DisplayHeight       = 32
@@ -32,22 +32,21 @@ var fontSet = []uint8{
 	0xF0, 0x80, 0xF0, 0x80, 0x80, //F
 }
 
-// http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0
 type Display = [DisplayHeight][DisplayWidth]uint8
 type Chip8 struct {
 	display Display // resolution pixel
 
 	memory [4096]uint8
 	v      [16]byte // data register v0-vf
-	keypad [16]bool
-	stack  [16]uint16 // subroutine stack
+	Keypad [16]bool
+	stack  [12]uint16 // subroutine stack 12 sections, 16 bits
 
 	pc uint16 // program counter
 	i  uint16 // index register
 	sp uint16 // stack pointer
 
-	delayTimer byte
-	soundTimer byte
+	delayTimer uint8
+	soundTimer uint8
 
 	instruction struct {
 		opcode uint16
@@ -57,11 +56,13 @@ type Chip8 struct {
 		x      uint8  // 4-bit register identifier
 		y      uint8  // 4-bit register identifier
 	}
+	shouldDraw bool
 }
 
 func NewChip8() *Chip8 {
 	chip8 := Chip8{
-		pc: programStart,
+		shouldDraw: true,
+		pc:         programStart,
 	}
 	copy(chip8.memory[:len(fontSet)], fontSet)
 	return &chip8
@@ -83,4 +84,10 @@ func (c *Chip8) LoadROM(path string) error {
 		c.memory[programStart+index] = bit
 	}
 	return err
+}
+
+func (c *Chip8) GetShouldDraw() bool {
+	sd := c.shouldDraw
+	c.shouldDraw = false
+	return sd
 }

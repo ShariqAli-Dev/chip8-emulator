@@ -16,9 +16,8 @@ const (
 )
 
 type display struct {
-	window       *sdl.Window
-	renderer     *sdl.Renderer
-	pixelTexture *sdl.Texture
+	window   *sdl.Window
+	renderer *sdl.Renderer
 }
 
 func NewDisplay() *display {
@@ -38,18 +37,10 @@ func (d *display) Init() error {
 		return fmt.Errorf("error creating renderer: %v", err)
 	}
 
-	d.pixelTexture, err = d.renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_STREAMING, displayWidth, displayHeight)
-	if err != nil {
-		return fmt.Errorf("error creating pixel texturer: %v", err)
-	}
-
 	return err
 }
 
 func (d *display) Close() {
-	d.pixelTexture.Destroy()
-	d.pixelTexture = nil
-
 	d.renderer.Destroy()
 	d.renderer = nil
 
@@ -58,15 +49,13 @@ func (d *display) Close() {
 }
 
 func (d *display) Render(display chip8.Display) {
-	d.renderer.SetDrawColor(255, 0, 0, 255)
 	d.renderer.Clear()
 
 	for j := 0; j < len(display); j++ {
 		for i := 0; i < len(display[j]); i++ {
-			if display[j][i] != 0 {
+			if display[j][i] == 1 {
 				d.renderer.SetDrawColor(255, 255, 255, 255)
 			} else {
-
 				d.renderer.SetDrawColor(0, 0, 0, 255)
 			}
 			d.renderer.FillRect(&sdl.Rect{
@@ -77,7 +66,7 @@ func (d *display) Render(display chip8.Display) {
 			})
 
 			// rectangle border (smaller rectangle)
-			d.renderer.SetDrawColor(0, 0, 0, 255)
+			d.renderer.SetDrawColor(45, 45, 45, 255)
 			borderThickness := int32(1)
 			d.renderer.DrawRect(&sdl.Rect{
 				Y: int32(j)*scaleFactor - borderThickness,
@@ -89,7 +78,6 @@ func (d *display) Render(display chip8.Display) {
 	}
 
 	d.renderer.Present()
-	sdl.Delay(uint32(1000 / fps))
 }
 
 func (d *display) Tick(c *chip8.Chip8) bool {
@@ -102,12 +90,81 @@ func (d *display) Tick(c *chip8.Chip8) bool {
 				switch e.Keysym.Scancode {
 				case sdl.SCANCODE_ESCAPE:
 					return false
+				case sdl.SCANCODE_1:
+					c.Keypad[0x1] = true
+				case sdl.SCANCODE_2:
+					c.Keypad[0x2] = true
+				case sdl.SCANCODE_3:
+					c.Keypad[0x3] = true
+				case sdl.SCANCODE_4:
+					c.Keypad[0xC] = true
+				case sdl.SCANCODE_Q:
+					c.Keypad[0x4] = true
+				case sdl.SCANCODE_W:
+					c.Keypad[0x5] = true
+				case sdl.SCANCODE_E:
+					c.Keypad[0x6] = true
+				case sdl.SCANCODE_R:
+					c.Keypad[0xD] = true
+				case sdl.SCANCODE_A:
+					c.Keypad[0x7] = true
+				case sdl.SCANCODE_S:
+					c.Keypad[0x8] = true
+				case sdl.SCANCODE_D:
+					c.Keypad[0x9] = true
+				case sdl.SCANCODE_F:
+					c.Keypad[0xE] = true
+				case sdl.SCANCODE_Z:
+					c.Keypad[0xA] = true
+				case sdl.SCANCODE_X:
+					c.Keypad[0x0] = true
+				case sdl.SCANCODE_C:
+					c.Keypad[0xB] = true
+				case sdl.SCANCODE_V:
+					c.Keypad[0xF] = true
+				}
+			} else if e.Type == sdl.KEYUP {
+				switch e.Keysym.Scancode {
+				case sdl.SCANCODE_1:
+					c.Keypad[0x1] = false
+				case sdl.SCANCODE_2:
+					c.Keypad[0x2] = false
+				case sdl.SCANCODE_3:
+					c.Keypad[0x3] = false
+				case sdl.SCANCODE_4:
+					c.Keypad[0xC] = false
+				case sdl.SCANCODE_Q:
+					c.Keypad[0x4] = false
+				case sdl.SCANCODE_W:
+					c.Keypad[0x5] = false
+				case sdl.SCANCODE_E:
+					c.Keypad[0x6] = false
+				case sdl.SCANCODE_R:
+					c.Keypad[0xD] = false
+				case sdl.SCANCODE_A:
+					c.Keypad[0x7] = false
+				case sdl.SCANCODE_S:
+					c.Keypad[0x8] = false
+				case sdl.SCANCODE_D:
+					c.Keypad[0x9] = false
+				case sdl.SCANCODE_F:
+					c.Keypad[0xE] = false
+				case sdl.SCANCODE_Z:
+					c.Keypad[0xA] = false
+				case sdl.SCANCODE_X:
+					c.Keypad[0x0] = false
+				case sdl.SCANCODE_C:
+					c.Keypad[0xB] = false
+				case sdl.SCANCODE_V:
+					c.Keypad[0xF] = false
 				}
 			}
 		}
 	}
 
-	d.Render(c.GetDisplay())
-
+	if c.GetShouldDraw() {
+		d.Render(c.GetDisplay())
+	}
+	sdl.Delay(uint32(1000 / fps))
 	return true
 }
