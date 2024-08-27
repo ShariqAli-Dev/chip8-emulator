@@ -47,20 +47,40 @@ func (c *Chip8) EmulateCycle() {
 		c.debugPrintOpcode("0x2NNN: call subroutine at NNN")
 		// store current address to return to on subroutine stack ("push" it on the stack)
 		// set the program ocutner to subroitune address so that the next opcode is gotten from there
-		c.sp = c.pc
+		c.stack[c.sp] = c.pc
 		c.sp++
 		c.pc = c.instruction.nnn
+	case 0x3:
+		c.debugPrintOpcode(fmt.Sprintf("0x3NNN: skips the next instruction if V%X == NN (0x3%X)", c.v[c.instruction.x], c.instruction.nn))
+		if c.v[c.instruction.x] == c.instruction.nn {
+			c.pc += 2
+		}
+	case 0x4:
+		c.debugPrintOpcode(fmt.Sprintf("0x4NNN: skips the next instruction if V%X != NN (0x3%X)", c.v[c.instruction.x], c.instruction.nn))
+		if c.v[c.instruction.x] != c.instruction.nn {
+			c.pc += 2
+		}
+	case 0x5:
+		c.debugPrintOpcode(fmt.Sprintf("0x5XYN: skips the next instruction if V%X == V%X", c.v[c.instruction.x], c.v[c.instruction.y]))
+		if c.v[c.instruction.x] == c.v[c.instruction.y] {
+			c.pc += 2
+		}
 	case 0x6:
 		c.debugPrintOpcode(fmt.Sprintf("0x6XNN: sets register V%X to NN (0x6%X)", c.instruction.x, c.instruction.nn))
 		c.v[c.instruction.x] = c.instruction.nn
 	case 0x7:
 		c.debugPrintOpcode(fmt.Sprintf("0x7XNN: set register V%X += NN (0x7%X)  Result: 0x7%X", c.instruction.x, c.instruction.nn, c.v[c.instruction.x]+c.instruction.nn))
 		c.v[c.instruction.x] += c.instruction.nn
+	case 0x9:
+		c.debugPrintOpcode(fmt.Sprintf("0x9XY0: skips the next instruction if V%X != V%X", c.v[c.instruction.x], c.v[c.instruction.y]))
+		if c.v[c.instruction.x] != c.v[c.instruction.y] {
+			c.pc += 2
+		}
 	case 0xA:
 		c.debugPrintOpcode(fmt.Sprintf("0xANNN: set I to NNN (0xA%X)", c.instruction.nnn))
 		c.i = c.instruction.nnn
 	case 0xD:
-		c.debugPrintOpcode(fmt.Sprintf("0xDXYN draws a sprite at coordinate (V%X, V%X) with a height of N (0xD%X)", c.instruction.x, c.instruction.y, c.instruction.n))
+		c.debugPrintOpcode(fmt.Sprintf("0xDXYN: draws a sprite at coordinate (V%X, V%X) with a height of N (0xD%X)", c.instruction.x, c.instruction.y, c.instruction.n))
 		c.v[0xF] = 0 // init carry flag to 0
 		// loop over the n rows of sprite
 		for j := uint8(0); j < c.instruction.n; j++ {

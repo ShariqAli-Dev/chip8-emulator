@@ -8,9 +8,13 @@ import (
 )
 
 // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
+// https://github.dev/skatiyar/go-chip8
+
+var roms = []string{"IBM Logo.ch8", "test_opcode.ch8", "Airplane.ch8"}
+
 func main() {
 	chip8 := chip8.NewChip8()
-	if err := chip8.LoadROM("./roms/IBM Logo.ch8"); err != nil {
+	if err := chip8.LoadROM("./roms/" + roms[0]); err != nil {
 		log.Fatal(error.Error(err))
 	}
 
