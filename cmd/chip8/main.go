@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/shariqali-dev/chip8-emulator/internal/chip8"
 	"github.com/shariqali-dev/chip8-emulator/internal/sdl"
@@ -14,8 +15,13 @@ func main() {
 		fmt.Println("Usage: <exe> <rom_path>")
 	}
 
+	romAbsolutePath, err := filepath.Abs(os.Args[1])
+	if err != nil {
+		log.Fatal(fmt.Errorf("error resolving rom path: %s", err))
+	}
+
 	chip8 := chip8.NewChip8()
-	if err := chip8.LoadROM(os.Args[2]); err != nil {
+	if err := chip8.LoadROM(romAbsolutePath); err != nil {
 		log.Fatal(error.Error(err))
 	}
 
