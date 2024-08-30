@@ -165,6 +165,24 @@ func (d *display) Tick(c *chip8.Chip8) bool {
 	if c.GetShouldDraw() {
 		d.Render(c.GetDisplay())
 	}
-	sdl.Delay(uint32(1000 / fps))
+
+	startFrameTime := float64(sdl.GetPerformanceCounter())
+	// emulate chip8 instructions for this emulator "frame" 60hz
+	for i := 0; i < int(c.GetInstructionsPerSecond())/fps; i++ {
+		c.EmulateCycle()
+	}
+	endFrameTime := float64(sdl.GetPerformanceCounter())
+	elapsedTime := ((endFrameTime - startFrameTime) / 1000) / float64(sdl.GetPerformanceFrequency())
+
+	necessaryDelayForFPSInMS := float64(1000) / fps
+	if necessaryDelayForFPSInMS > elapsedTime {
+		sdl.Delay(uint32(necessaryDelayForFPSInMS - elapsedTime))
+	} else {
+		sdl.Delay(0)
+	}
+
+	c.DecrementTimers()
+
 	return true
+
 }

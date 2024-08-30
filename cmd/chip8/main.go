@@ -13,6 +13,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: <exe> <rom_path>")
+		return
 	}
 
 	romAbsolutePath, err := filepath.Abs(os.Args[1])
@@ -37,6 +38,5 @@ func main() {
 	}
 
 	for display.Tick(chip8) {
-		chip8.EmulateCycle()
 	}
 }

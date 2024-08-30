@@ -6,11 +6,12 @@ import (
 )
 
 const (
-	programStart        = 0x200
-	maxRomSize          = 0xFFF - programStart
-	fontSetStartAddress = 0x050
-	DisplayWidth        = 64
-	DisplayHeight       = 32
+	programStart          = 0x200
+	maxRomSize            = 0xFFF - programStart
+	fontSetStartAddress   = 0x050
+	DisplayWidth          = 64
+	DisplayHeight         = 32
+	instructionsPerSecond = 700
 )
 
 var fontSet = []uint8{
@@ -90,4 +91,22 @@ func (c *Chip8) GetShouldDraw() bool {
 	sd := c.shouldDraw
 	c.shouldDraw = false
 	return sd
+}
+
+func (c *Chip8) GetInstructionsPerSecond() uint {
+	return instructionsPerSecond
+}
+
+func (c *Chip8) DecrementTimers() {
+	if c.delayTimer > 0 {
+		c.delayTimer -= 1
+	}
+	if c.soundTimer > 0 {
+		if c.soundTimer == 1 {
+			// play the beepor sound effect
+		} else {
+			// stop playing the sound effect
+		}
+		c.soundTimer -= 1
+	}
 }
