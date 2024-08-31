@@ -57,13 +57,17 @@ type Chip8 struct {
 		x      uint8  // 4-bit register identifier
 		y      uint8  // 4-bit register identifier
 	}
+
 	shouldDraw bool
+
+	beeper func()
 }
 
 func NewChip8() *Chip8 {
 	chip8 := Chip8{
 		shouldDraw: true,
 		pc:         programStart,
+		beeper:     func() {},
 	}
 	copy(chip8.memory[:len(fontSet)], fontSet)
 	return &chip8
@@ -103,10 +107,12 @@ func (c *Chip8) DecrementTimers() {
 	}
 	if c.soundTimer > 0 {
 		if c.soundTimer == 1 {
-			// play the beepor sound effect
-		} else {
-			// stop playing the sound effect
+			c.beeper()
 		}
 		c.soundTimer -= 1
 	}
+}
+
+func (c *Chip8) AddBeeper(fn func()) {
+	c.beeper = fn
 }

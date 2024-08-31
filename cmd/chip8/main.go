@@ -21,21 +21,31 @@ func main() {
 		log.Fatal(fmt.Errorf("error resolving rom path: %s", err))
 	}
 
+	// chip8 cycle begins
 	chip8 := chip8.NewChip8()
 	if err := chip8.LoadROM(romAbsolutePath); err != nil {
-		log.Fatal(error.Error(err))
+		log.Fatal(err)
 	}
 
+	// sdl inits
 	defer sdl.Close()
 	if err := sdl.Init(); err != nil {
-		log.Fatal(error.Error(err))
+		log.Fatal(err)
 	}
-
+	beeper := sdl.NewBeeper()
+	defer beeper.Close()
+	if err := beeper.Init(); err != nil {
+		log.Fatal(err)
+	}
 	display := sdl.NewDisplay()
 	defer display.Close()
 	if err := display.Init(); err != nil {
-		log.Fatal(error.Error(err))
+		log.Fatal(err)
 	}
+
+	chip8.AddBeeper(func() {
+		beeper.PlaySound()
+	})
 
 	for display.Tick(chip8) {
 	}
